@@ -4,7 +4,7 @@ const router = express.Router();
 
 const apiUrl =
   "https://apigw1.bot.or.th/bot/public/financial-institutions-holidays/";
-const apiKey = "08a5cc74-12f6-4edc-8d3e-d8325180a3aa";
+const apiKey = "";
 
 let holiday = [];
 
