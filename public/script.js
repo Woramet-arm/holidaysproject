@@ -17,6 +17,7 @@ document.addEventListener("click", (event) => {
   }
 });
 
+// ฟังก์ชันดึงข้อมูลวันหยุดจาก API
 async function fetchHolidays(year, month) {
   try {
     const response = await fetch(`/holidays/${year}/${month + 1}`);
@@ -28,40 +29,49 @@ async function fetchHolidays(year, month) {
   }
 }
 
+// ฟังก์ชันแสดงปฏิทิน
 async function renderCalendar() {
-  daysGrid.innerHTML = "";
+  daysGrid.innerHTML = ""; // ล้างปฏิทินก่อนสร้างใหม่
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
+
+  // ตั้งค่าชื่อเดือนและปีในส่วนหัว
   monthYear.innerText = `${currentDate.toLocaleString("th-TH", {
     month: "long",
   })} ${year + 543}`;
 
+  // คำนวณวันแรกของเดือนและจำนวนวันในเดือน
   const firstDay = new Date(year, month, 1).getDay();
   const lastDate = new Date(year, month + 1, 0).getDate();
 
+  // ดึงข้อมูลวันหยุด
   const holidays = await fetchHolidays(year, month);
 
+  // เพิ่มช่องว่างก่อนวันที่ 1
   for (let i = 0; i < firstDay; i++) {
-    daysGrid.innerHTML += `<div></div>`;
+    const emptyCell = document.createElement("div");
+    emptyCell.classList.add("empty");
+    daysGrid.appendChild(emptyCell);
   }
 
+  // เพิ่มวันที่ในเดือน
   for (let i = 1; i <= lastDate; i++) {
     let dayDiv = document.createElement("div");
     dayDiv.className = "day";
     dayDiv.textContent = i;
 
-    // 🎯 ไฮไลท์วันปัจจุบัน
+    // ไฮไลท์วันปัจจุบัน
     if (year === currentYear && month === currentMonth && i === currentDay) {
       dayDiv.classList.add("today");
     }
 
+    // ไฮไลท์วันอาทิตย์
     const dayOfWeek = new Date(year, month, i).getDay();
     if (dayOfWeek === 0) {
-      // 0 หมายถึงวันอาทิตย์
       dayDiv.classList.add("sunday");
     }
 
-    // 🎈 ไฮไลท์วันหยุด
+    // ไฮไลท์วันหยุด
     const holiday = holidays.find((h) => {
       const holidayDate = new Date(h.Date);
       return (
@@ -77,7 +87,7 @@ async function renderCalendar() {
       // สร้าง tooltip
       const tooltip = document.createElement("div");
       tooltip.className = "tooltip";
-      tooltip.textContent = holiday.HolidayDescriptionThai || "ไม่มีคำอธิบาย"; // ตรวจสอบว่ามี HolidayDescriptionThai หรือไม่
+      tooltip.textContent = holiday.HolidayDescriptionThai || "ไม่มีคำอธิบาย";
 
       // เพิ่ม tooltip เข้าไปใน dayDiv
       dayDiv.appendChild(tooltip);
@@ -98,4 +108,5 @@ async function renderCalendar() {
   }
 }
 
+// เรียกฟังก์ชันแสดงปฏิทินครั้งแรก
 renderCalendar();

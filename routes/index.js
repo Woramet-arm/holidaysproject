@@ -1,37 +1,38 @@
-var express = require("express");
-var router = express.Router();
+const express = require("express");
 const axios = require("axios");
-let current;
+const router = express.Router();
+
 const apiUrl =
   "https://apigw1.bot.or.th/bot/public/financial-institutions-holidays/";
 const apiKey = "08a5cc74-12f6-4edc-8d3e-d8325180a3aa";
+
 let holiday = [];
 
+// ฟังก์ชันดึงข้อมูลวันหยุดจาก API
 async function fetchHolidaysData() {
   try {
-    current = new Date();
-    holiday = [];
-    const response = await axios.get(
-      `${apiUrl}?year=${current.getFullYear()}`,
-      {
-        headers: {
-          "X-IBM-Client-Id": apiKey,
-        },
-      }
-    );
+    const currentYear = new Date().getFullYear();
+    const response = await axios.get(`${apiUrl}?year=${currentYear}`, {
+      headers: { "X-IBM-Client-Id": apiKey },
+    });
 
-    // เก็บข้อมูลลง holiday
-    holiday.push(...response.data.result.data); // ใช้ spread operator เพื่อเก็บข้อมูลใน array
-
-    // แปลงข้อมูลใน array holiday ด้วย transformHolidayData
-    holiday = holiday.map((item) => transformHolidayData(item));
+    // แปลงข้อมูลและเก็บในตัวแปร holiday
+    holiday = response.data.result.data.map(transformHolidayData);
   } catch (err) {
     console.error("Error fetching data:", err.message);
-    res.status(500).send("Error fetching data: " + err.message);
   }
 }
 
-// ฟังก์ชันแปลงเลขเดือนเป็นชื่อเดือน
+// ฟังก์ชันแปลงข้อมูลวันหยุด
+function transformHolidayData(data) {
+  const dateObj = new Date(data.Date);
+  return {
+    ...data,
+    MonthNameThai: getMonthName(dateObj.getMonth()), // เพิ่มชื่อเดือนภาษาไทย
+  };
+}
+
+// ฟังก์ชันแปลงเลขเดือนเป็นชื่อเดือนภาษาไทย
 function getMonthName(monthNumber) {
   const monthNames = [
     "มกราคม",
@@ -47,35 +48,22 @@ function getMonthName(monthNumber) {
     "พฤศจิกายน",
     "ธันวาคม",
   ];
-
-  return monthNames[monthNumber]; // เลขเดือนจาก getMonth() จะเป็น 0-11
+  return monthNames[monthNumber];
 }
 
-// ฟังก์ชันจัดการข้อมูล API
-function transformHolidayData(data) {
-  const dateObj = new Date(data.Date); // แปลง Date จาก string เป็น Date object
-  const monthNumber = dateObj.getMonth(); // ดึงเลขเดือน (0-11)
-
-  // เพิ่มชื่อเดือนเข้าไปใน object
-  return {
-    ...data,
-    MonthNameThai: getMonthName(monthNumber), // ชื่อเดือนภาษาไทย
-  };
-}
-
+// ดึงข้อมูลวันหยุดทุก 1 ชั่วโมง
 setInterval(fetchHolidaysData, 3600000);
-
 fetchHolidaysData();
-/* GET home page. */
-router.get("/", function (req, res, next) {
-  // ส่งข้อมูล holiday ไปยังไฟล์ EJS
+
+// Route: แสดงหน้าแรก
+router.get("/", (req, res) => {
   res.render("index", { holiday });
 });
 
+// Route: ดึงวันหยุดตามปีและเดือน
 router.get("/holidays/:year/:month", (req, res) => {
   const { year, month } = req.params;
 
-  // กรองวันหยุดเฉพาะปีและเดือนที่ร้องขอ
   const filteredHolidays = holiday.filter((h) => {
     const holidayDate = new Date(h.Date);
     return (
@@ -84,13 +72,31 @@ router.get("/holidays/:year/:month", (req, res) => {
     );
   });
 
-  // เพิ่ม HolidayDescriptionThai หากไม่มี
   const holidaysWithDescription = filteredHolidays.map((h) => ({
     ...h,
-    HolidayDescriptionThai: h.HolidayDescriptionThai || "ไม่มีคำอธิบาย", // เพิ่มข้อความเริ่มต้นหากไม่มีค่า
+    HolidayDescriptionThai: h.HolidayDescriptionThai || "ไม่มีคำอธิบาย",
   }));
 
-  res.json(holidaysWithDescription); // ส่งข้อมูลวันหยุดกลับไปในรูปแบบ JSON
+  res.json(holidaysWithDescription);
+});
+
+// Route: แสดงวันหยุดทั้งหมด
+router.get("/holidays", (req, res) => {
+  if (!holiday || holiday.length === 0) {
+    return res.status(503).send("กำลังโหลดข้อมูลวันหยุด กรุณาลองใหม่อีกครั้ง");
+  }
+
+  const holidaysByMonth = holiday.reduce((acc, h) => {
+    const month = h.MonthNameThai;
+    if (!acc[month]) acc[month] = [];
+    acc[month].push(h);
+    return acc;
+  }, {});
+
+  res.render("holidays", {
+    title: "ดูวันหยุดทั้งหมด",
+    holidays: holidaysByMonth,
+  });
 });
 
 module.exports = router;

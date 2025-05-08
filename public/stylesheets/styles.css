@@ -1,47 +1,116 @@
+/* Body */
 body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background-color: #f4f4f4;
-  display: flex; /* ใช้ flexbox */
-  justify-content: center; /* จัดให้อยู่ตรงกลางแนวนอน */
-  align-items: center; /* จัดให้อยู่ตรงกลางแนวตั้ง */
-  height: 100vh; /* ให้ body มีความสูงเต็มหน้าจอ */
-  margin: 0; /* ลบ margin เริ่มต้นของ body */
+  font-family: "Sarabun", Arial, sans-serif; /* ฟอนต์ภาษาไทย */
+  background-color: #f0f9f0; /* สีเขียวอ่อน */
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
+/* Header */
+header {
+  background-color: #289548; /* สีเขียวเข้ม ธกส. */
+  width: 100%;
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* เพิ่มเงา */
+}
+
+header nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+header nav ul li {
+  display: inline;
+}
+
+header nav ul li a {
+  color: white; /* ฟอนต์สีขาว */
+  text-decoration: none;
+  font-weight: bold;
+  padding: 10px 15px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+header nav ul li a:hover {
+  background-color: #228b22; /* สีเขียวสดเมื่อ hover */
+}
+
+/* Calendar */
 .calendar {
-  width: 350px;
-  padding: 20px;
+  display: grid;
+  grid-template-rows: auto auto 1fr; /* แบ่งส่วน: header, days-of-week, days-grid */
+  grid-template-columns: 1fr; /* หนึ่งคอลัมน์เต็ม */
+  width: 100%; /* ยืดเต็มความกว้าง */
+  max-width: 500px; /* จำกัดความกว้างสูงสุด */
+  padding: 0;
   background: white;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  margin-top: 50px;
+  border: 2px solid #006400; /* กรอบสีเขียวเข้ม */
+  box-sizing: border-box;
 }
 
 .calendar-header {
+  grid-row: 1; /* อยู่ในแถวแรก */
+  grid-column: 1; /* อยู่ในคอลัมน์แรก */
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 10px;
-}
-
-.days-of-week span:first-child, /* วันอาทิตย์ในส่วนหัว */
-
-.day.sunday {
-  /* วันอาทิตย์ในปฏิทิน */
-  color: red;
+  padding: 10px;
+  background-color: #289548; /* สีเขียวอ่อน */
+  color: white; /* ฟอนต์สีขาว */
+  font-size: 1.5em;
   font-weight: bold;
+  text-align: center;
+  width: 100%; /* ยืดเต็มความกว้าง */
+  box-sizing: border-box; /* รวม padding ในความกว้าง */
+  border-radius: 8px 8px 0 0; /* มุมโค้งด้านบน */
 }
 
+/* Days of the week */
 .days-of-week {
+  grid-row: 2; /* อยู่ในแถวที่สอง */
+  grid-column: 1; /* อยู่ในคอลัมน์แรก */
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, 1fr); /* 7 คอลัมน์สำหรับ 7 วัน */
   font-weight: bold;
+  margin: 10px 0;
+  padding: 10px 0;
+  color: #006400;
+  background-color: #f0f9f0; /* สีเขียวอ่อน */
+  border-radius: 0 0 8px 8px; /* มุมโค้งด้านล่าง */
+  text-align: center;
 }
 
+.sunday {
+  color: red; /* เปลี่ยนสีข้อความเป็นสีแดง */
+  font-weight: bold; /* ทำให้ตัวอักษรหนา */
+}
+
+.days-of-week span:first-child {
+  color: red; /* Highlight Sunday */
+}
+
+/* Days grid */
 .days-grid {
+  grid-row: 3; /* อยู่ในแถวที่สาม */
+  grid-column: 1; /* อยู่ในคอลัมน์แรก */
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, 1fr); /* 7 คอลัมน์สำหรับวันที่ */
   gap: 5px;
+  padding: 10px;
 }
 
 .day {
@@ -50,59 +119,134 @@ body {
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: #ddd;
+  background: #e6ffe6; /* สีเขียวอ่อน */
   border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+  margin: auto;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-/* 🎯 ทำให้วันปัจจุบันเป็นวงกลม */
+.day:hover {
+  background-color: #c8f7c5; /* สีเขียวสดเมื่อ hover */
+}
+
+/* Highlight today */
 .today {
-  background: #4caf50 !important;
+  background: #4caf50 !important; /* สีเขียวสด */
   color: white;
   font-weight: bold;
 }
 
-/* 🎈 ไฮไลท์วันหยุด */
+/* Highlight holidays */
 .holiday {
-  background: #ff5722 !important;
+  background: #ff5722 !important; /* สีส้มสำหรับวันหยุด */
   color: white;
   font-weight: bold;
   border-radius: 50%;
 }
 
-.day {
-  position: relative; /* ใช้สำหรับ tooltip */
-  cursor: pointer; /* เปลี่ยนเคอร์เซอร์เป็นแบบคลิกได้ */
-}
-
+/* Tooltip */
 .day .tooltip {
-  visibility: hidden; /* ซ่อน tooltip โดยค่าเริ่มต้น */
-  background-color: #333; /* สีพื้นหลังของ tooltip */
-  color: #fff; /* สีข้อความ */
+  visibility: hidden;
+  background-color: #333;
+  color: #fff;
   text-align: center;
   border-radius: 5px;
   padding: 5px;
   position: absolute;
   z-index: 1;
-  bottom: 125%; /* ตำแหน่ง tooltip ด้านบน */
+  bottom: 125%;
   left: 50%;
   transform: translateX(-50%);
-  white-space: nowrap; /* ป้องกันข้อความตัดบรรทัด */
-  opacity: 0; /* ทำให้โปร่งใส */
-  transition: opacity 0.3s; /* เพิ่มเอฟเฟกต์การแสดง */
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .day .tooltip::after {
   content: "";
   position: absolute;
-  top: 100%; /* ลูกศรอยู่ด้านล่างของ tooltip */
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
   border-width: 5px;
   border-style: solid;
-  border-color: #333 transparent transparent transparent; /* ลูกศรสามเหลี่ยม */
+  border-color: #333 transparent transparent transparent;
 }
 
 .day.show-tooltip .tooltip {
-  visibility: visible; /* แสดง tooltip เมื่อคลาส show-tooltip ถูกเพิ่ม */
-  opacity: 1; /* ทำให้ tooltip ชัดเจน */
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Container สำหรับหน้า holidays */
+.holidays-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  border: 2px solid #006400; /* กรอบสีเขียวเข้ม */
+}
+
+/* หัวข้อหลัก */
+.holidays-container h1 {
+  text-align: center;
+  color: #006400; /* สีเขียวเข้ม */
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+/* หัวข้อเดือน */
+.holidays-container h2 {
+  color: #289548; /* สีเขียวอ่อน */
+  font-size: 1.5em;
+  margin-top: 20px;
+  border-bottom: 2px solid #006400; /* เส้นใต้สีเขียวเข้ม */
+  padding-bottom: 5px;
+}
+
+/* รายการวันหยุด */
+.holiday-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.holiday-item:hover {
+  background-color: #e6ffe6; /* สีเขียวอ่อนเมื่อ hover */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* วันที่ */
+.holiday-date {
+  width: 120px;
+  font-weight: bold;
+  color: #006400; /* สีเขียวเข้ม */
+  text-align: left;
+}
+
+/* คำอธิบายวันหยุด */
+.holiday-description {
+  flex: 1;
+  color: #555;
+  text-align: left;
+  font-size: 1em;
+}
+
+/* ช่องว่างก่อนวันที่ 1 */
+.empty {
+  width: 40px;
+  height: 40px;
+  background: transparent;
 }

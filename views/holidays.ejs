@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>วันหยุดทั้งหมด</title>
+    <link rel="stylesheet" href="/stylesheets/styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <ul>
+          <li><a href="/">หน้าหลัก</a></li>
+          <li><a href="/holidays">วันหยุดทั้งหมด</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="holidays-container">
+      <h1>วันหยุดทั้งหมด</h1>
+      <% for (const month in holidays) { %>
+      <h2><%= month %></h2>
+      <ul>
+        <% holidays[month].forEach(holiday => { %>
+        <li class="holiday-item">
+          <span class="holiday-date">
+            <%= new Date(holiday.Date).getDate() %> <%= month %>
+          </span>
+          <span class="holiday-description">
+            <%= holiday.HolidayDescriptionThai || "ไม่มีคำอธิบาย" %>
+          </span>
+        </li>
+        <% }) %>
+      </ul>
+      <% } %>
+    </div>
+  </body>
+</html>
