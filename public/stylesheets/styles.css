@@ -35,15 +35,24 @@ header nav ul li {
 
 header nav ul li a {
   color: white; /* ฟอนต์สีขาว */
-  text-decoration: none;
+  text-decoration: none; /* ไม่มีขีดเส้นใต้เริ่มต้น */
   font-weight: bold;
   padding: 10px 15px;
   border-radius: 5px;
-  transition: background-color 0.3s ease;
+  transition: color 0.3s ease, border-bottom 0.3s ease; /* เพิ่ม transition */
+  border-bottom: 2px solid transparent; /* เส้นใต้โปร่งใส */
 }
 
 header nav ul li a:hover {
   background-color: #228b22; /* สีเขียวสดเมื่อ hover */
+}
+
+nav ul li a.active {
+  color: #ffff;
+  font-weight: bold;
+  border-bottom: 2px solid #ffff; /* เส้นใต้สีขาว */
+  background-color: #228b22; /* สีเขียวสด */
+  border-radius: 5px;
 }
 
 /* Calendar */

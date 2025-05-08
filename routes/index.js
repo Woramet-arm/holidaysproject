@@ -58,7 +58,7 @@ fetchHolidaysData();
 
 // Route: แสดงหน้าแรก
 router.get("/", (req, res) => {
-  res.render("index", { holiday });
+  res.render("index", { holiday, activePage: "home" });
 });
 
 // Route: ดึงวันหยุดตามปีและเดือน
@@ -97,6 +97,7 @@ router.get("/holidays", (req, res) => {
   res.render("holidays", {
     title: "ดูวันหยุดทั้งหมด",
     holidays: holidaysByMonth,
+    activePage: "holidays",
   });
 });
 
