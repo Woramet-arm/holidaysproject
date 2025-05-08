@@ -7,22 +7,25 @@ const currentYear = currentDate.getFullYear();
 const currentMonth = currentDate.getMonth();
 const currentDay = currentDate.getDate();
 
+// ซ่อน tooltip ทั้งหมดเมื่อคลิกนอก tooltip
 document.addEventListener("click", (event) => {
-  // ตรวจสอบว่าคลิกเกิดขึ้นนอก tooltip หรือไม่
   if (!event.target.closest(".day")) {
-    // ซ่อน tooltip ทั้งหมด
-    document.querySelectorAll(".day").forEach((d) => {
-      d.classList.remove("show-tooltip");
-    });
+    hideAllTooltips();
   }
 });
+
+// ฟังก์ชันซ่อน tooltip ทั้งหมด
+function hideAllTooltips() {
+  document.querySelectorAll(".day").forEach((day) => {
+    day.classList.remove("show-tooltip");
+  });
+}
 
 // ฟังก์ชันดึงข้อมูลวันหยุดจาก API
 async function fetchHolidays(year, month) {
   try {
     const response = await fetch(`/holidays/${year}/${month + 1}`);
-    const holidays = await response.json();
-    return holidays;
+    return await response.json();
   } catch (error) {
     console.error("Error fetching holidays:", error);
     return [];
@@ -31,80 +34,100 @@ async function fetchHolidays(year, month) {
 
 // ฟังก์ชันแสดงปฏิทิน
 async function renderCalendar() {
-  daysGrid.innerHTML = ""; // ล้างปฏิทินก่อนสร้างใหม่
+  clearCalendar();
+  updateMonthYearHeader();
+
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const lastDate = new Date(year, month + 1, 0).getDate();
+  const holidays = await fetchHolidays(year, month);
 
-  // ตั้งค่าชื่อเดือนและปีในส่วนหัว
+  addEmptyCells(firstDay);
+  addDaysToCalendar(year, month, lastDate, holidays);
+}
+
+// ฟังก์ชันล้างปฏิทิน
+function clearCalendar() {
+  daysGrid.innerHTML = "";
+}
+
+// ฟังก์ชันอัปเดตส่วนหัวของเดือนและปี
+function updateMonthYearHeader() {
+  const year = currentDate.getFullYear();
   monthYear.innerText = `${currentDate.toLocaleString("th-TH", {
     month: "long",
   })} ${year + 543}`;
+}
 
-  // คำนวณวันแรกของเดือนและจำนวนวันในเดือน
-  const firstDay = new Date(year, month, 1).getDay();
-  const lastDate = new Date(year, month + 1, 0).getDate();
-
-  // ดึงข้อมูลวันหยุด
-  const holidays = await fetchHolidays(year, month);
-
-  // เพิ่มช่องว่างก่อนวันที่ 1
+// ฟังก์ชันเพิ่มช่องว่างก่อนวันที่ 1
+function addEmptyCells(firstDay) {
   for (let i = 0; i < firstDay; i++) {
     const emptyCell = document.createElement("div");
     emptyCell.classList.add("empty");
     daysGrid.appendChild(emptyCell);
   }
+}
 
-  // เพิ่มวันที่ในเดือน
-  for (let i = 1; i <= lastDate; i++) {
-    let dayDiv = document.createElement("div");
-    dayDiv.className = "day";
-    dayDiv.textContent = i;
-
-    // ไฮไลท์วันปัจจุบัน
-    if (year === currentYear && month === currentMonth && i === currentDay) {
-      dayDiv.classList.add("today");
-    }
-
-    // ไฮไลท์วันอาทิตย์
-    const dayOfWeek = new Date(year, month, i).getDay();
-    if (dayOfWeek === 0) {
-      dayDiv.classList.add("sunday");
-    }
-
-    // ไฮไลท์วันหยุด
-    const holiday = holidays.find((h) => {
-      const holidayDate = new Date(h.Date);
-      return (
-        holidayDate.getFullYear() === year &&
-        holidayDate.getMonth() === month &&
-        holidayDate.getDate() === i
-      );
-    });
-
-    if (holiday) {
-      dayDiv.classList.add("holiday");
-
-      // สร้าง tooltip
-      const tooltip = document.createElement("div");
-      tooltip.className = "tooltip";
-      tooltip.textContent = holiday.HolidayDescriptionThai || "ไม่มีคำอธิบาย";
-
-      // เพิ่ม tooltip เข้าไปใน dayDiv
-      dayDiv.appendChild(tooltip);
-
-      // เพิ่ม event listener สำหรับการคลิก
-      dayDiv.addEventListener("click", () => {
-        // ซ่อน tooltip อื่น ๆ ก่อน
-        document.querySelectorAll(".day").forEach((d) => {
-          d.classList.remove("show-tooltip");
-        });
-
-        // แสดง tooltip ของวันหยุดที่คลิก
-        dayDiv.classList.toggle("show-tooltip");
-      });
-    }
-
+// ฟังก์ชันเพิ่มวันที่ในปฏิทิน
+function addDaysToCalendar(year, month, lastDate, holidays) {
+  for (let day = 1; day <= lastDate; day++) {
+    const dayDiv = createDayDiv(year, month, day, holidays);
     daysGrid.appendChild(dayDiv);
+  }
+}
+
+// ฟังก์ชันสร้าง div สำหรับวัน
+function createDayDiv(year, month, day, holidays) {
+  const dayDiv = document.createElement("div");
+  dayDiv.className = "day";
+  dayDiv.textContent = day;
+
+  highlightToday(dayDiv, year, month, day);
+  highlightSunday(dayDiv, year, month, day);
+  addHolidayTooltip(dayDiv, year, month, day, holidays);
+
+  return dayDiv;
+}
+
+// ฟังก์ชันไฮไลท์วันปัจจุบัน
+function highlightToday(dayDiv, year, month, day) {
+  if (year === currentYear && month === currentMonth && day === currentDay) {
+    dayDiv.classList.add("today");
+  }
+}
+
+// ฟังก์ชันไฮไลท์วันอาทิตย์
+function highlightSunday(dayDiv, year, month, day) {
+  const dayOfWeek = new Date(year, month, day).getDay();
+  if (dayOfWeek === 0) {
+    dayDiv.classList.add("sunday");
+  }
+}
+
+// ฟังก์ชันเพิ่ม tooltip สำหรับวันหยุด
+function addHolidayTooltip(dayDiv, year, month, day, holidays) {
+  const holiday = holidays.find((h) => {
+    const holidayDate = new Date(h.Date);
+    return (
+      holidayDate.getFullYear() === year &&
+      holidayDate.getMonth() === month &&
+      holidayDate.getDate() === day
+    );
+  });
+
+  if (holiday) {
+    dayDiv.classList.add("holiday");
+
+    const tooltip = document.createElement("div");
+    tooltip.className = "tooltip";
+    tooltip.textContent = holiday.HolidayDescriptionThai || "ไม่มีคำอธิบาย";
+    dayDiv.appendChild(tooltip);
+
+    dayDiv.addEventListener("click", () => {
+      hideAllTooltips();
+      dayDiv.classList.toggle("show-tooltip");
+    });
   }
 }
 
