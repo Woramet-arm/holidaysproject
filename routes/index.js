@@ -1,10 +1,11 @@
 const express = require("express");
 const axios = require("axios");
 const router = express.Router();
+require("dotenv").config();
 
 const apiUrl =
   "https://apigw1.bot.or.th/bot/public/financial-institutions-holidays/";
-const apiKey = "";
+const apiKey = process.env.API_KEY;
 
 let holiday = [];
 
